@@ -1,6 +1,7 @@
 // src/app.rs
-use leptos::leptos_dom::ev::MouseEvent;
-use leptos::*;
+use leptos::ev::MouseEvent;
+use leptos::prelude::*;
+use leptos::spawn::spawn_local;
 use serde::{Deserialize, Serialize};
 use serde_wasm_bindgen::to_value;
 use wasm_bindgen::prelude::*;
@@ -18,7 +19,7 @@ struct CounterArgs {
 
 #[component]
 pub fn App() -> impl IntoView {
-    let (count, set_count) = create_signal(0);
+    let (count, set_count) = signal(0);
     let increase_me = move |ev: MouseEvent| {
         ev.prevent_default();
         spawn_local(async move {
