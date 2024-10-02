@@ -1,15 +1,9 @@
 // src/app.rs
-use leptos::leptos_dom::ev::MouseEvent;
-use leptos::*;
+use leptos::ev::MouseEvent;
+use leptos::prelude::*;
+use leptos::spawn::spawn_local;
 use serde::{Deserialize, Serialize};
-use serde_wasm_bindgen::to_value;
-use wasm_bindgen::prelude::*;
-
-#[wasm_bindgen]
-extern "C" {
-    #[wasm_bindgen(js_namespace = ["window", "__TAURI__", "core"])]
-    async fn invoke(cmd: &str, args: JsValue) -> JsValue;
-}
+use tauri_sys::core::invoke;
 
 #[derive(Serialize, Deserialize)]
 struct CounterArgs {
@@ -18,13 +12,13 @@ struct CounterArgs {
 
 #[component]
 pub fn App() -> impl IntoView {
-    let (count, set_count) = create_signal(0);
+    let (count, set_count) = signal(0);
     let increase_me = move |ev: MouseEvent| {
         ev.prevent_default();
         spawn_local(async move {
             let count = count.get_untracked();
-            let args = to_value(&CounterArgs { count }).unwrap();
-            let new_value = invoke("increase", args).await.as_f64().unwrap();
+            let args = CounterArgs { count };
+            let new_value: f64 = invoke("increase", args).await;
             set_count.set(new_value as i32);
         });
     };
@@ -32,8 +26,8 @@ pub fn App() -> impl IntoView {
         ev.prevent_default();
         spawn_local(async move {
             let count = count.get_untracked();
-            let args = to_value(&CounterArgs { count }).unwrap();
-            let new_value = invoke("decrease", args).await.as_f64().unwrap();
+            let args = CounterArgs { count };
+            let new_value: f64 = invoke("decrease", args).await;
             set_count.set(new_value as i32);
         });
     };
